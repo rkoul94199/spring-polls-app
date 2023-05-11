@@ -17,42 +17,41 @@ pipeline {
     stages {
         stage('SNYK test') {
            steps {
-                dir('/polo/spring-security-react-ant-design-polls-app/polling-app-server') {
-                    snykSecurity(
+                        snykSecurity(
                         snykInstallation: 'snyk-scanner',
                         snykTokenId: 'snyk-api-token',
                         failOnIssues: 'false',
                         failOnError: 'false',
                     )
-                }
+                
             }
         }
         stage('SonarQube SAST') {
             steps {
-                dir('/polo/spring-security-react-ant-design-polls-app/polling-app-server') {
+                //dir('/polo/spring-security-react-ant-design-polls-app/polling-app-server') {
                     withSonarQubeEnv('sonarqube-scanner'){
                         sh 'mvn sonar:sonar -Dsonar.exclusions=**/*.java'
                         
-                    }
+           //         }
                 }
             }
         }
         stage('Create container image') {
           steps {
               script {
-                  dir('/polo/spring-security-react-ant-design-polls-app/polling-app-client') {
+         //         dir('/polo/spring-security-react-ant-design-polls-app/polling-app-client') {
                       dockerImage = docker.build(IMAGE_NAME)
-                  }
+             //     }
               }
           }
       }
       stage('Scan image grype') {
           steps {
               script {
-                  dir('/polo/spring-security-react-ant-design-polls-app/polling-app-client') {
+               //   dir('/polo/spring-security-react-ant-design-polls-app/polling-app-client') {
                       sh "grype ${IMAGE_NAME} --scope AllLayers"
                       //sh "grype ${dockerimagename} --scope AllLayers --fail-on=critical"
-                  }
+               //   }
               }
           }
       }
@@ -83,23 +82,23 @@ pipeline {
       }
       stage('Kube-score') {
         steps {
-          dir('/polo/spring-security-react-ant-design-polls-app/deployments') {
+        //  dir('/polo/spring-security-react-ant-design-polls-app/deployments') {
              sh '''
               kube-score score polling-app-client.yaml || true
              '''
-              }
+          //    }
           }
        }
        stage('check gcloud version') {
           steps {
-          dir('/polo/spring-security-react-ant-design-polls-app/deployments') {
+        //  dir('/polo/spring-security-react-ant-design-polls-app/deployments') {
           sh '''
           gcloud auth activate-service-account --key-file=${GCLOUD_CREDS}
           gcloud container clusters get-credentials ${GKE_CLUSTER} --zone ${GKE_ZONE}
           kubectl get pods
           kubectl apply -f polling-app-client.yaml
           '''
-          }
+  //        }
           }
         }
     }
