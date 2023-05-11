@@ -17,6 +17,7 @@ pipeline {
     stages {
         stage('SNYK test') {
            steps {
+                      sh 'pwd'
                         snykSecurity(
                         snykInstallation: 'snyk-scanner',
                         snykTokenId: 'snyk-api-token',
